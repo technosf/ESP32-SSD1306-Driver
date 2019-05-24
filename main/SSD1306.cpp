@@ -1,8 +1,19 @@
 /*
- * SSD1306.cpp
- *
- *  Created on: May 9, 2019
- *      Author: technosf@github
+ ESP32-SSD1306-Driver Library SSD1306 Driver
+
+ v0.1.0
+
+ Copyright 2019 technosf [https://github.com/technosf]
+
+ Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3.0 or greater (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ https://www.gnu.org/licenses/lgpl-3.0.en.html
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and limitations under the License.
  */
 
 #include <stdio.h>
@@ -19,7 +30,7 @@ SSD1306::SSD1306( PIF* pif, panel_type_t type )
 	m_type = type;
 	m_buffer = new uint8_t [ m_type ] [ COLUMNS ];    	// Display buffer - Page by Column
 	m_buffer_size = m_type * COLUMNS;
-	printf( "type:%d buffsize: %d buffer at %p", m_type, m_buffer_size, m_buffer );
+	printf( "type:%d buffer size: %d buffer at %p", m_type, m_buffer_size, m_buffer );
 	m_height = m_type * 8;         	// panel height (32 or 64)
 	m_pixels = m_width * m_height;    // panel pixel count
 }
@@ -32,65 +43,12 @@ bool SSD1306::init()
 	if ( m_type == SSD1306_128x64 )
 	{
 		printf( "SSD init 64\n" );
-		static uint8_t initcmds64 [] = { 0xae,    // SSD1306_DISPLAYOFF
-				0xd5,    // SSD1306_SETDISPLAYCLOCKDIV
-				0x80,    // Suggested value 0x80
-				0xa8,    // SSD1306_SETMULTIPLEX
-				0x3f,    // 1/64
-				0xd3,    // SSD1306_SETDISPLAYOFFSET
-				0x00,    // 0 no offset
-				0x40,    // SSD1306_SETSTARTLINE line #0
-				0x20,    // SSD1306_MEMORYMODE
-				0x00,    // 0x0 act like ks0108
-				0xa1,    // SSD1306_SEGREMAP | 1
-				0xc8,    // SSD1306_COMSCANDEC
-				0xda,    // SSD1306_SETCOMPINS
-				0x12,    //
-				0x81,    // SSD1306_SETCONTRAST
-				0xcf,    //
-				0xd9,    // SSD1306_SETPRECHARGE
-				0xf1,    //
-				0xdb,    // SSD1306_SETVCOMDETECT
-				0x30,    //
-				0x8d,    // SSD1306_CHARGEPUMP
-				0x14,    // Charge pump on
-				0x2e,    // SSD1306_DEACTIVATE_SCROLL
-				0xa4,    // SSD1306_DISPLAYALLON_RESUME
-				0xa6    // SSD1306_NORMALDISPLAY
-				};
 
 		m_pif->command( initcmds64, sizeof ( initcmds64 ) );
 	}
 	else if ( m_type == SSD1306_128x32 )
 	{
 		printf( "SSD init 32\n" );
-		static uint8_t initcmds32 [] = { 0xae,    // SSD1306_DISPLAYOFF
-				0xd5,    // SSD1306_SETDISPLAYCLOCKDIV
-				0x80,    // Suggested value 0x80
-				0xa8,    // SSD1306_SETMULTIPLEX
-				0x1f,    // 1/32
-				0xd3,    // SSD1306_SETDISPLAYOFFSET
-				0x00,    // 0 no offset
-				0x40,    // SSD1306_SETSTARTLINE line #0
-				0x8d,    // SSD1306_CHARGEPUMP
-				0x14,    // Charge pump on
-				0x20,    // SSD1306_MEMORYMODE
-				0x00,    // 0x0 act like ks0108
-				0xa1,    // SSD1306_SEGREMAP | 1
-				0xc8,    // SSD1306_COMSCANDEC
-				0xda,    // SSD1306_SETCOMPINS
-				0x02,    //
-				0x81,    // SSD1306_SETCONTRAST
-				0x2f,    //
-				0xd9,    // SSD1306_SETPRECHARGE
-				0xf1,    //
-				0xdb,    // SSD1306_SETVCOMDETECT
-				0x40,    //
-				0x2e,    // SSD1306_DEACTIVATE_SCROLL
-				0xa4,    // SSD1306_DISPLAYALLON_RESUME
-				0xa6    // SSD1306_NORMALDISPLAY
-				};
-
 		m_pif->command( initcmds32, sizeof ( initcmds32 ) );
 	}
 
@@ -100,17 +58,14 @@ bool SSD1306::init()
 	refresh( true );
 
 	printf( "SSD init ON\n" );
-	m_pif->command( 0xaf );    // SSD1306_DISPLAYON
+	m_pif->command( SSD1306_DISPLAYON );
 	return true;
 }
 
 void SSD1306::term()
 {
-	static uint8_t term [] = { 0xae,    // SSD1306_DISPLAYOFF
-			0x8d,    // SSD1306_CHARGEPUMP
-			0x10 };    // Charge pump off
 
-	m_pif->command( term, sizeof ( term ) );
+	m_pif->command( termcmds, sizeof ( termcmds ) );
 	memset( m_buffer, 0, m_height / 8 );
 }
 
@@ -157,12 +112,8 @@ void SSD1306::refresh( bool force )
 
 	printf( "SSD Refresh force:%d cs:%d ce:%d ps:%d pe:%d segs:%d\n", force, columnstart, columnend, pagestart, pageend,
 			segments );
-	uint8_t refresh [] = { 0x21,    // SSD1306_COLUMNADDR
-			columnstart,    // column start
-			columnend,    // column end
-			0x22,    // SSD1306_PAGEADDR
-			pagestart,    // page start
-			pageend };    // page end
+	uint8_t refresh [] = { SSD1306_COLUMNADDR, columnstart, columnend,    //  Column window
+			SSD1306_PAGEADDR, pagestart, pageend };    // Page window
 
 	m_pif->command( refresh, sizeof ( refresh ) );
 
@@ -181,7 +132,7 @@ void SSD1306::refresh( bool force )
 
 bool SSD1306::segment( uint8_t page, uint8_t column, uint8_t bits, color_t color, uint8_t count )
 {
-	if ( count == 0 || ( page >= m_type ) || ( column >= m_height ) ) return false;
+	if ( count == 0 || ( page >= m_type ) || ( column >= m_width ) ) return false;
 
 	uint8_t endcolumn = ( ( column + count ) > COLUMNS ) ? COLUMNS : ( column + count );
 
@@ -213,12 +164,12 @@ bool SSD1306::segment( uint8_t page, uint8_t column, uint8_t bits, color_t color
 
 bool SSD1306::pixel( uint8_t x, uint8_t y, color_t color )
 {
-	printf( "Pixel X:%d Y:%d Page:%d Bits:%d Color:%d\n", x, y, y / 8, ( 1 << ( y & 7 ) ), color );
 	return segment( y / 8, x, ( 1 << ( y & 7 ) ), color );
 }
 
 bool SSD1306::box( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h )
 {
+
 	if ( w == 0 || h == 0 ) return false;
 
 	w = min( (int) w, COLUMNS - x );		// Clip X
@@ -238,18 +189,13 @@ bool SSD1306::box( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h )
 	uint8_t seg = y % 8;		// Start segment
 	uint8_t yremainder = 8 - seg;    // Number of bits to draw
 	uint8_t filler = BITS [ min( yremainder, h ) - 1 ] << seg;
-	//printf( "T::Y:%d H:%d Seg:%d YR:%d MN:%d F:0x%02x\n", y, h, seg, yremainder, min( yremainder, h ), filler );
-//	filler = filler << ( seg );
 	segment( pagestart, x, filler, color, w );
-
-	printf( "T::Y:%d H:%d Seg:%d YR:%d F:0x%02x\n", y, h, seg, yremainder, filler );
 
 	if ( pageend > pagestart )
 	{
 		seg = ( y + h - 1 ) % 8;		// Number of bits to draw
 		filler = BITS [ seg ];    // Get bit pattern a
 		segment( pageend, x, filler, color, w );
-		printf( "B::Seg:%d F:0x%02x\n", seg, filler );
 	}
 	return true;
 }
@@ -267,9 +213,9 @@ bool SSD1306::vertical( uint8_t x, uint8_t y, color_t color, uint8_t h, uint8_t 
 void SSD1306::invert_display( bool invert )
 {
 	if ( invert )
-		m_pif->command( 0xa7 );    // SSD1306_INVERTDISPLAY
+		m_pif->command( SSD1306_INVERTDISPLAY );
 	else
-		m_pif->command( 0xa6 );    // SSD1306_NORMALDISPLAY
+		m_pif->command( SSD1306_NORMALDISPLAY );
 }
 
 void SSD1306::update_buffer( uint8_t* data, uint16_t length )
