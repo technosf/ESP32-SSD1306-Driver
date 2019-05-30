@@ -52,31 +52,31 @@ class OLED : public Display
          * @brief   Return OLED panel height
          * @return  Panel height, or return 0 if failed (panel not initialized)
          */
-        uint8_t width();
+        virtual uint8_t width();
 
         /**
          * @brief   Return OLED panel height
          * @return  Panel height, or return 0 if failed (panel not initialized)
          */
-        uint8_t height();
+        virtual uint8_t height();
 
         /**
          * @brief   Clear display buffer (fill with black)
          */
-        OLED &clear();
+        virtual Display &clear();
 
         /**
          * @brief   Refresh display (send display buffer to the panel)
          * @param   force   The program automatically tracks "dirty" region to minimize refresh area. Set #force to true
          *                  ignores the dirty region and refresh the whole screen.
          */
-        OLED &refresh( bool force = false );
+        virtual Display &refresh( bool force = false );
 
         /**
          * @brief   Set normal or inverted display
          * @param   invert      Invert display?
          */
-        OLED &invert( bool invert );
+        virtual Display &invert( bool invert );
 
         /**
          * @brief   Draw one pixel
@@ -84,7 +84,7 @@ class OLED : public Display
          * @param   y       Y coordinate
          * @param   color   Color of the pixel
          */
-        OLED &draw_pixel( uint8_t x, uint8_t y, color_t color );
+        virtual Display &draw_pixel( uint8_t x, uint8_t y, color_t color );
 
         /**
          * @brief   Draw horizontal line
@@ -93,7 +93,7 @@ class OLED : public Display
          * @param   w       Line width
          * @param   color   Color of the line
          */
-        OLED &draw_hline( uint8_t x, uint8_t y, uint8_t w, color_t color );
+        virtual Display &draw_hline( uint8_t x, uint8_t y, uint8_t w, color_t color );
 
         /**
          * @brief   Draw vertical line
@@ -102,7 +102,7 @@ class OLED : public Display
          * @param   h       Line height
          * @param   color   Color of the line
          */
-        OLED &draw_vline( uint8_t x, uint8_t y, uint8_t h, color_t color );
+        virtual Display &draw_vline( uint8_t x, uint8_t y, uint8_t h, color_t color );
 
         /**
          * @brief   Draw a rectangle
@@ -112,7 +112,7 @@ class OLED : public Display
          * @param   h       Rectangle height
          * @param   color   Color of the rectangle border
          */
-        OLED &draw_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color );
+        virtual Display &draw_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color );
 
         /**
          * @brief   Draw a filled rectangle
@@ -122,7 +122,7 @@ class OLED : public Display
          * @param   h       Rectangle height
          * @param   color   Color of the rectangle
          */
-        OLED &fill_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color );
+        virtual Display &fill_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color );
 
         /**
          * @brief   Draw a filled circle
@@ -131,7 +131,7 @@ class OLED : public Display
          * @param   r       Radius
          * @param   color   Color of the circle
          */
-        OLED &draw_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color );
+        virtual Display &draw_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color );
 
         /**
          * @brief   Draw a filled circle
@@ -140,7 +140,7 @@ class OLED : public Display
          * @param   r       Radius
          * @param   color   Color of the circle
          */
-        OLED &fill_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color );
+        virtual Display &fill_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color );
 
         /**
          * @brief   Draw one character using currently selected font
@@ -151,7 +151,7 @@ class OLED : public Display
          * @param   background  Background color
          * @return  Width of the character
          */
-        OLED &draw_char( uint8_t x, uint8_t y, unsigned char c, color_t foreground, color_t background,
+        virtual Display &draw_char( uint8_t x, uint8_t y, unsigned char c, color_t foreground, color_t background,
                 uint8_t* outwidth = nullptr );
 
 };

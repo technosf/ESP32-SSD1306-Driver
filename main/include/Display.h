@@ -45,13 +45,13 @@ class Display
          * @brief   Return display width in pixels
          * @return  Panel width, or return 0 if failed (panel not initialized)
          */
-        virtual uint8_t width();
+        virtual uint8_t width()= 0;
 
         /**
          * @brief   Return display height in pixels
          * @return  Panel height, or return 0 if failed (panel not initialized)
          */
-        virtual uint8_t height();
+        virtual uint8_t height()= 0;
 
         /**
          * @brief   Clear display buffer (fill with black)
@@ -157,7 +157,7 @@ class Display
          * @return  Width of the string (out-of-display pixels also included)
          */
         virtual Display &draw_string( uint8_t x, uint8_t y, std::string str, color_t foreground, color_t background,
-                uint8_t* outwidth )
+                uint8_t* outwidth ) final
         {
             if ( font == NULL || str.empty() )
             {
@@ -182,7 +182,7 @@ class Display
          * @param   str         String to measure
          * @return  Width of the string
          */
-        virtual uint8_t measure_string( std::string str )
+        virtual uint8_t measure_string( std::string str ) final
         {
             uint8_t w = 0;
             unsigned char c;
@@ -206,7 +206,7 @@ class Display
          * @brief   Get the height of current selected font
          * @return  Height of the font (in pixels) or 0 if none font selected
          */
-        virtual uint8_t get_font_height()
+        virtual uint8_t get_font_height() final
         {
             if ( font == nullptr ) return 0;
 
@@ -217,7 +217,7 @@ class Display
          * @brief   Get the "C" value (space between adjacent characters)
          * @return  "C" value
          */
-        virtual uint8_t get_font_c()
+        virtual uint8_t get_font_c() final
         {
             if ( font == NULL ) return 0;
 
@@ -228,7 +228,7 @@ class Display
          * @brief   Select font for drawing
          * @param   idx     Font index, see fonts.c
          */
-        virtual Display &select_font( uint8_t idx )
+        virtual Display &select_font( uint8_t idx ) final
         {
             if ( idx < NUM_FONTS ) font = fonts [ idx ];
             return *this;

@@ -36,31 +36,31 @@ uint8_t OLED::height()
     return m_ssd1306.height();
 }
 
-OLED &OLED::clear()
+Display &OLED::clear()
 {
     m_ssd1306.clear();
     return *this;
 }
 
-OLED &OLED::refresh( bool force )
+Display &OLED::refresh( bool force )
 {
     m_ssd1306.refresh( force );
     return *this;
 }
 
-OLED &OLED::invert( bool invert )
+Display &OLED::invert( bool invert )
 {
     m_ssd1306.invert_display( invert );
     return *this;
 }
 
-OLED &OLED::draw_pixel( uint8_t x, uint8_t y, color_t color )
+Display &OLED::draw_pixel( uint8_t x, uint8_t y, color_t color )
 {
     m_ssd1306.pixel( x, y, color );
     return *this;
 }
 
-OLED &OLED::draw_hline( uint8_t x, uint8_t y, uint8_t w, color_t color )
+Display &OLED::draw_hline( uint8_t x, uint8_t y, uint8_t w, color_t color )
 {
     if ( ( w == 0 ) || ( x >= width() ) || ( y >= height() ) ) return *this;
 
@@ -69,7 +69,7 @@ OLED &OLED::draw_hline( uint8_t x, uint8_t y, uint8_t w, color_t color )
     return *this;
 }
 
-OLED &OLED::draw_vline( uint8_t x, uint8_t y, uint8_t h, color_t color )
+Display &OLED::draw_vline( uint8_t x, uint8_t y, uint8_t h, color_t color )
 {
     if ( ( h == 0 ) || ( x >= width() ) || ( y >= height() ) ) return *this;
 
@@ -78,7 +78,7 @@ OLED &OLED::draw_vline( uint8_t x, uint8_t y, uint8_t h, color_t color )
     return *this;
 }
 
-OLED &OLED::draw_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color )
+Display &OLED::draw_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color )
 {
     if ( ( w == 0 ) || ( h == 0 ) || ( x >= width() ) || ( y >= height() ) ) return *this;
     m_ssd1306.vertical( x, y, color, h );
@@ -88,7 +88,7 @@ OLED &OLED::draw_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t 
     return *this;
 }
 
-OLED &OLED::fill_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color )
+Display &OLED::fill_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color )
 {
     if ( ( w == 0 ) || ( h == 0 ) || ( x >= width() ) || ( y >= height() ) ) return *this;
 
@@ -97,7 +97,7 @@ OLED &OLED::fill_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t 
     return *this;
 }
 
-OLED &OLED::draw_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color )
+Display &OLED::draw_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color )
 {
 // Refer to http://en.wikipedia.org/wiki/Midpoint_circle_algorithm for the algorithm
 
@@ -143,7 +143,7 @@ OLED &OLED::draw_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color )
     return *this;
 }
 
-OLED &OLED::fill_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color )
+Display &OLED::fill_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color )
 {
     int8_t x = 1;
     int8_t y = r;
@@ -208,7 +208,7 @@ OLED &OLED::fill_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color )
  * Slices characters into segments rather than decompose as individual pixels
  * Requires L-R MSB-LSB scanning bitmaps to be remapped into T-B LSB-MSB segment bitmaps
  */
-OLED &OLED::draw_char( uint8_t x, uint8_t y, unsigned char c, color_t foreground, color_t background,
+Display &OLED::draw_char( uint8_t x, uint8_t y, unsigned char c, color_t foreground, color_t background,
         uint8_t* outwidth )
 {
     if ( font == NULL )

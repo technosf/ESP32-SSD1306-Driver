@@ -83,6 +83,10 @@ class SSD1306
          */
         SSD1306( PIF* pif, panel_type_t type );
 
+        virtual ~SSD1306()
+        {
+        }
+
         /**
          * @brief   Initialize OLED panel
          * @return  true if successful
@@ -189,6 +193,7 @@ class SSD1306
     private:
         const uint8_t BITS [ 8 ] = { 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF };    /// < Segment bit mask
 
+        bool m_init { false };
         PIF * m_pif;	///< Wire protocol adapter
         panel_type_t m_type;
         uint8_t (*m_buffer) [ COLUMNS ];    /// Display buffer - Page by Column
