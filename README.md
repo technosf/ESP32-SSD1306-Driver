@@ -1,6 +1,6 @@
 # ESP32 SSD1306 Driver
 
-Software driver for the **SSD1306** OLED driver chip for the **ESP-IDF** toolchain, with pluggable wire protocol interface (with included I2C and 3-wire SPI implementations), written to efficiently manage and write to the paged-memory architecture of the SSD1306.
+Software driver for the **SSD1306** OLED driver chip for the **ESP-IDF** toolchain, with pluggable wire protocol interface (with included _I2C_ implementations - _SPI_ under development), written to efficiently manage and write to the paged-memory architecture of the SSD1306.
 
 The included _main_ class will run through some graphic experiences for you :)
 
@@ -26,7 +26,7 @@ The graphics component adds a higher level commands to draw and fill boxes and c
 Thinking about what could be added:
 * Virtual displays viewports (for split display regions, or multiple displays
 * Virtual displays for multiple physical displays/drivers
-* 4-wire SPI driver
+* _x_-wire SPI driver
 * More and improved graphics funtions
 * Antialiasing
 * Vertical scanning fonts
@@ -45,7 +45,7 @@ The code has been reorganized too with the font management component, which appe
 
 ## License
 
-ESPxRGB - Copyright 2019  technosf  [http://github.com/technosf]
+ESP32-SSD1306-Driver - Copyright 2019  technosf  [http://github.com/technosf]
 
 Licensed under the GNU LESSER GENERAL PUBLIC LICENSE, Version 3.0 or greater (the "License");
 you may not use this file except in compliance with the License.

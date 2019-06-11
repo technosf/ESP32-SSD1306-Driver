@@ -7,4 +7,3 @@ PROJECT_NAME := ESP32-SSD1306-Driver
 
 include $(IDF_PATH)/make/project.mk
 
-##COMPONENT_LDFLAGS += -lstdc++

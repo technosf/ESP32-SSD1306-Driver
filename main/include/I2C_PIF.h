@@ -30,6 +30,8 @@
  */
 class I2C_PIF : public PIF
 {
+        static const constexpr int BUSSPEEDHZ = 1000000;
+
     private:
 
         i2c_port_t i2c_master_port = I2C_NUM_0;
@@ -93,7 +95,7 @@ class I2C_PIF : public PIF
             conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
             conf.scl_io_num = scl;
             conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-            conf.master.clk_speed = 1000000;	// 1MHz
+            conf.master.clk_speed = BUSSPEEDHZ;
 
             ESP_ERROR_CHECK( i2c_param_config( i2c_master_port, &conf ) );
             ESP_ERROR_CHECK( i2c_driver_install( i2c_master_port, I2C_MODE_MASTER, 0, 0, 0 ) );

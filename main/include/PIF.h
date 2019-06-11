@@ -46,20 +46,21 @@ class PIF
 
         /**
          * @brief Sends a SSD1306 command over the wire protocol to the SSD1306 from the ESP32
+         * @param cmd the command
          */
         virtual void command( uint8_t cmd ) = 0;
 
         /**
          * @brief Sends SSD1306 commands over the wire protocol to the SSD1306 from the ESP32
-         * @param cmd
-         * @param size
+         * @param cmd the command
+         * @param size size of command in bytes
          */
         virtual void command( uint8_t* cmd, uint8_t size ) = 0;
 
         /**
          * @brief Sends SSD1306 data over the wire protocol to the SSD1306 from the ESP32
-         * @param data
-         * @param size
+         * @param data the data
+         * @param size size of data in bytes
          */
         virtual void data( uint8_t* data, uint8_t size ) = 0;
 };

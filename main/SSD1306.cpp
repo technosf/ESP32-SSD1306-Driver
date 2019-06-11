@@ -16,6 +16,7 @@
  See the License for the specific language governing permissions and limitations under the License.
  */
 
+#include <esp_log.h>
 #include <stdio.h>
 
 #include <algorithm>
@@ -37,38 +38,38 @@ SSD1306::SSD1306( PIF* pif, panel_type_t type )
 
 bool SSD1306::init()
 {
+    ESP_LOGI( TAG, "::init" );
     if ( m_init ) return false;
     m_init = true;
-    term();
+    powerdown();
 
     // Now we assume all sending will be successful
     if ( m_type == SSD1306_128x64 )
     {
-        printf( "SSD init 64\n" );
-
+        ESP_LOGI( TAG, "\tcmd: init 64" );
         m_pif->command( initcmds64, sizeof ( initcmds64 ) );
     }
     else if ( m_type == SSD1306_128x32 )
     {
-        printf( "SSD init 32\n" );
+        ESP_LOGI( TAG, "\tcmd: init 32" );
         m_pif->command( initcmds32, sizeof ( initcmds32 ) );
     }
 
-    printf( "SSD init clear\n" );
     clear();
-    printf( "SSD init refresh\n" );
     refresh( true );
 
-    printf( "SSD init ON\n" );
+    ESP_LOGI( TAG, "\tcmd: ON" );
     m_pif->command( SSD1306_DISPLAYON );
-    printf( "SSD init exit\n" );
+
+    ESP_LOGI( TAG, "::init - complete" );
     return true;
 }
 
-void SSD1306::term()
+void SSD1306::powerdown()
 {
-    printf( "SSD term()\n" );
-    m_pif->command( termcmds, sizeof ( termcmds ) );
+    ESP_LOGI( TAG, "::powerdown" );
+
+    m_pif->command( pwrdwncmds, sizeof ( pwrdwncmds ) );
     memset( m_buffer, 0, m_height / 8 );
 }
 
@@ -82,26 +83,38 @@ uint8_t SSD1306::height()
     return m_height;
 }
 
-void SSD1306::clear()
+void SSD1306::clear( bool limit )
 {
-    printf( "SSD Clear buffer size:%d\n", m_buffer_size );
+    ESP_LOGI( TAG, "::clear  limit:%d", limit );
 
-    memset( m_buffer, 0, m_buffer_size );
-    // Maximize "Dirty" window
-    m_refresh_top = 0;
-    m_refresh_left = 0;
-    m_refresh_bottom = m_type - 1;
-    m_refresh_right = m_width - 1;
+    if ( !limit )
+    {
+        memset( m_buffer, 0, m_buffer_size );
+        m_dirtywindow.touch();
+        return;
+    }
+
+    // Clear the dirty window only
+
+    uint8_t segments = 1 + m_previous_dirtywindow.rightcol - m_previous_dirtywindow.leftcol;
+    for ( int page = m_previous_dirtywindow.toppage; page <= m_previous_dirtywindow.bottompage; page++ )
+    {
+        memset( m_buffer [ page ] + m_previous_dirtywindow.leftcol, 0, segments );
+        m_dirtywindow.touch( page, m_previous_dirtywindow.leftcol, m_previous_dirtywindow.rightcol );
+    }
 }
 
 void SSD1306::refresh( bool force )
 {
-    if ( ( m_refresh_right < m_refresh_left ) || ( m_refresh_top > m_refresh_bottom ) ) return;
+    ESP_LOGI( TAG, "::refresh Force:%d", force );
 
-    uint8_t columnstart { m_refresh_left }, columnend { m_refresh_right };
-    uint8_t pagestart { m_refresh_top };
-    uint8_t pageend { m_refresh_bottom };
-    uint8_t segments = m_refresh_right - m_refresh_left;
+    if ( !m_dirtywindow.isdirty ) return;
+
+    uint8_t columnstart { m_dirtywindow.leftcol }, columnend { m_dirtywindow.rightcol };
+    uint8_t pagestart { m_dirtywindow.toppage };
+    uint8_t pageend { m_dirtywindow.bottompage };
+    if ( pageend >= m_type ) pageend = m_type - 1;
+    uint8_t segments = 1 + columnend - columnstart;
 
     if ( force )
     /*
@@ -111,42 +124,38 @@ void SSD1306::refresh( bool force )
         columnstart = 0;
         columnend = COLUMNS - 1;
         pagestart = 0;
-        pageend = static_cast< uint8_t >( m_type - 1 );
+        pageend = m_type - 1;
         segments = COLUMNS;
     }
 
-    printf( "SSD Refresh force:%d cs:%d ce:%d ps:%d pe:%d segs:%d\n", force, columnstart, columnend, pagestart, pageend,
-            segments );
-    uint8_t refresh [] = { SSD1306_COLUMNADDR, columnstart, columnend,    //  Column window
+    uint8_t refreshcmd [] = { SSD1306_COLUMNADDR, columnstart, columnend,    //  Column window
             SSD1306_PAGEADDR, pagestart, pageend };    // Page window
 
-    m_pif->command( refresh, sizeof ( refresh ) );
+    m_pif->command( refreshcmd, sizeof ( refreshcmd ) );
 
-    for ( int i = pagestart; i <= pageend; i++ )
+    for ( int page = pagestart; page <= pageend; page++ )
+    /*
+     * Send data in up to page sized chunks
+     */
     {
-        printf( "SSD data %p\n", m_buffer [ i ] );
-        m_pif->data( m_buffer [ i ] + columnstart, segments );
+        m_pif->data( m_buffer [ page ] + columnstart, segments );
     }
 
-    // Minimize Dirty Window
-    m_refresh_top = 255;
-    m_refresh_bottom = 0;
-    m_refresh_left = 255;
-    m_refresh_right = 0;
+    // Clear Dirty Window
+    m_previous_dirtywindow = m_dirtywindow;
+    m_dirtywindow.clear();
 }
 
 bool SSD1306::segment( uint8_t page, uint8_t column, uint8_t bits, color_t color, uint8_t count )
 {
+    //   ESP_LOGI( TAG, "::segment page:%d column:%d count:%d", page, column, count );
+
     if ( count == 0 || ( page >= m_type ) || ( column >= m_width ) ) return false;
 
-    uint8_t endcolumn = ( ( column + count ) > COLUMNS ) ? COLUMNS : ( column + count );
+    uint8_t stopbeforecolumn { static_cast< uint8_t >( column + count ) };
+    if ( stopbeforecolumn >= COLUMNS ) stopbeforecolumn = COLUMNS - 1;
 
-    m_refresh_top = min( m_refresh_top, page );
-    m_refresh_bottom = max( m_refresh_bottom, page );
-    m_refresh_left = min( m_refresh_left, column );
-    m_refresh_right = max( m_refresh_right, static_cast< uint8_t >( endcolumn - 1 ) );
-
-    for ( uint8_t i = column; i < endcolumn; i++ )
+    for ( uint8_t i = column; i < stopbeforecolumn; i++ )
     {
         switch ( color )
         {
@@ -164,16 +173,20 @@ bool SSD1306::segment( uint8_t page, uint8_t column, uint8_t bits, color_t color
         }    // switch
     }    // for
 
+    m_dirtywindow.touch( page, column, stopbeforecolumn - 1 );
+
     return true;
 }
 
 bool SSD1306::pixel( uint8_t x, uint8_t y, color_t color )
 {
+    //  ESP_LOGI( TAG, "::pixel  x:%d  y:%d", x, y );
     return segment( y / 8, x, ( 1 << ( y & 7 ) ), color );
 }
 
 bool SSD1306::box( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h )
 {
+    ESP_LOGI( TAG, "::box x:%d y:%d w:%d h:%d", x, y, w, h );
 
     if ( w == 0 || h == 0 ) return false;
 
@@ -183,19 +196,26 @@ bool SSD1306::box( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h )
     uint8_t pagestart = y / 8;
     uint8_t pageend = ( y + h - 1 ) / 8;    // Do not double count origin line
 
+    uint8_t seg = y % 8;        // Start segment
+    uint8_t yremainder = 8 - seg;    // Number of bits to draw
+    uint8_t filler = BITS [ min( yremainder, h ) - 1 ] << seg;
+
+    /*
+     * First page
+     */
+    segment( pagestart, x, filler, color, w );
+
     for ( uint8_t p = ( pagestart + 1 ); p < ( pageend ); p++ )
     /*
-     * Fill intermediate pages, if any
+     * Fill intermediate pages, if more than two pages
      */
     {
         segment( p, x, 0xFF, color, w );
     }
 
-    uint8_t seg = y % 8;		// Start segment
-    uint8_t yremainder = 8 - seg;    // Number of bits to draw
-    uint8_t filler = BITS [ min( yremainder, h ) - 1 ] << seg;
-    segment( pagestart, x, filler, color, w );
-
+    /*
+     * Last page, if multiple pages
+     */
     if ( pageend > pagestart )
     {
         seg = ( y + h - 1 ) % 8;		// Number of bits to draw
@@ -207,16 +227,62 @@ bool SSD1306::box( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h )
 
 bool SSD1306::horizontal( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h )
 {
+    ESP_LOGI( TAG, "::horizontal >" );
     return box( x, y, color, w, h );
 }
 
 bool SSD1306::vertical( uint8_t x, uint8_t y, color_t color, uint8_t h, uint8_t w )
 {
+    ESP_LOGI( TAG, "::vertical >" );
     return box( x, y, color, w, h );
+}
+
+void SSD1306::line( uint8_t x, uint8_t y, color_t color, uint8_t xx, uint8_t yy )
+{
+    ESP_LOGI( TAG, "::line  %d,%d - %d,%d", x, y, xx, yy );
+
+    if ( xx < x )    // Ensure we're going left>right
+    {
+        uint8_t tmp { x };
+        x = xx;
+        xx = tmp;
+        tmp = y;
+        y = yy;
+        yy = tmp;
+    }
+
+    int dx { xx - x };
+    int dy { yy - y };
+    int ydelta { 1 };
+    if ( yy < y )
+    {
+        dy = y - yy;
+        ydelta = -1;
+    }
+
+    int p { 2 * dy - dx };
+
+    do
+    {
+        if ( p >= 0 )
+        {
+            pixel( x, y, color );
+            p = p + ( 2 * dy ) - ( 2 * dx );
+            y += ydelta;
+        }
+        else
+        {
+            pixel( x, y, color );
+            p = p + ( 2 * dy );
+        }
+    }
+    while ( ( x < m_width ) && ( x++ < xx ) );
 }
 
 void SSD1306::invert_display( bool invert )
 {
+    ESP_LOGI( TAG, "::invert_display invert:%d", invert );
+
     if ( invert )
         m_pif->command( SSD1306_INVERTDISPLAY );
     else
@@ -225,5 +291,6 @@ void SSD1306::invert_display( bool invert )
 
 void SSD1306::update_buffer( uint8_t* data, uint16_t length )
 {
+    ESP_LOGI( TAG, "::update_buffer" );
     memcpy( m_buffer, data, min( length, m_buffer_size ) );
 }

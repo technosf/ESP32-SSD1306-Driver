@@ -1,5 +1,5 @@
 /*
- ESP32-SSD1306-Driver Library OLED interface
+ ESP32-SSD1306-Driver Library Display interface
 
  v0.1.0
 
@@ -22,8 +22,6 @@
 #include <string>
 #include <stdint.h>
 
-#include <oled_fonts.h>
-
 #include "SSD1306.h"
 
 /** \class Display
@@ -31,15 +29,10 @@
  */
 class Display
 {
-    protected:
-
-        const font_info_t* font { NULL };    /// < Current font
 
     public:
 
-        virtual ~Display()
-        {
-        }
+        //  virtual ~Display();
 
         /**
          * @brief   Return display width in pixels
@@ -55,29 +48,34 @@ class Display
 
         /**
          * @brief   Clear display buffer (fill with black)
+         * @param   limit Cleared area is limited to the last refreshed area
+         * @return  Display - Fluent
          */
-        virtual Display &clear() = 0;
+        virtual Display& clear( bool limit = false ) = 0;
 
         /**
          * @brief   Refresh display (send display buffer to the panel)
          * @param   force   The program automatically tracks "dirty" region to minimize refresh area. Set #force to true
          *                  ignores the dirty region and refresh the whole screen.
+         * @return  Display - Fluent
          */
-        virtual Display &refresh( bool force = false ) = 0;
+        virtual Display& refresh( bool force = false ) = 0;
 
         /**
          * @brief   Set normal or inverted display
-         * @param   invert      Invert display?
+         * @param   invert      Invert display true/false?
+         * @return  Display - Fluent
          */
-        virtual Display &invert( bool invert ) = 0;
+        virtual Display& invert( bool invert ) = 0;
 
         /**
          * @brief   Draw one pixel
          * @param   x       X coordinate
          * @param   y       Y coordinate
          * @param   color   Color of the pixel
+         * @return  Display - Fluent
          */
-        virtual Display &draw_pixel( uint8_t x, uint8_t y, color_t color ) = 0;
+        virtual Display& draw_pixel( uint8_t x, uint8_t y, color_t color ) = 0;
 
         /**
          * @brief   Draw horizontal line
@@ -85,8 +83,9 @@ class Display
          * @param   y       Y coordinate or starting (left) point
          * @param   w       Line width
          * @param   color   Color of the line
+         * @return  Display - Fluent
          */
-        virtual Display &draw_hline( uint8_t x, uint8_t y, uint8_t w, color_t color ) = 0;
+        virtual Display& draw_hline( uint8_t x, uint8_t y, uint8_t w, color_t color ) = 0;
 
         /**
          * @brief   Draw vertical line
@@ -94,8 +93,20 @@ class Display
          * @param   y       Y coordinate or starting (top) point
          * @param   h       Line height
          * @param   color   Color of the line
+         * @return  Display - Fluent
          */
-        virtual Display &draw_vline( uint8_t x, uint8_t y, uint8_t h, color_t color ) = 0;
+        virtual Display& draw_vline( uint8_t x, uint8_t y, uint8_t h, color_t color ) = 0;
+
+        /**
+         * @brief   Draw an aliased line
+         * @param   x       X coordinate or starting (top) point
+         * @param   y       Y coordinate or starting (top) point
+         * @param   xx      X coordinate or ending (bottom) point
+         * @param   yy      Y coordinate or ending (bottom) point
+         * @param   color   Color of the line
+         * @return  Display - Fluent
+         */
+        virtual Display& draw_line( uint8_t x, uint8_t y, uint8_t xx, uint8_t yy, color_t color ) = 0;
 
         /**
          * @brief   Draw a rectangle
@@ -104,8 +115,9 @@ class Display
          * @param   w       Rectangle width
          * @param   h       Rectangle height
          * @param   color   Color of the rectangle border
+         * @return  Display - Fluent
          */
-        virtual Display &draw_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color ) = 0;
+        virtual Display& draw_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color ) = 0;
 
         /**
          * @brief   Draw a filled rectangle
@@ -114,26 +126,29 @@ class Display
          * @param   w       Rectangle width
          * @param   h       Rectangle height
          * @param   color   Color of the rectangle
+         * @return  Display - Fluent
          */
-        virtual Display &fill_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color ) = 0;
+        virtual Display& fill_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color_t color ) = 0;
 
         /**
          * @brief   Draw a filled circle
-         * @param   x0      X coordinate or center
-         * @param   y0      Y coordinate or center
+         * @param   x      X coordinate or center
+         * @param   y      Y coordinate or center
          * @param   r       Radius
          * @param   color   Color of the circle
+         * @return  Display - Fluent
          */
-        virtual Display &draw_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color ) = 0;
+        virtual Display& draw_circle( uint8_t x, uint8_t y, uint8_t r, color_t color ) = 0;
 
         /**
          * @brief   Draw a filled circle
-         * @param   x0      X coordinate or center
-         * @param   y0      Y coordinate or center
+         * @param   x      X coordinate or center
+         * @param   y      Y coordinate or center
          * @param   r       Radius
          * @param   color   Color of the circle
+         * @return  Display - Fluent
          */
-        virtual Display &fill_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color ) = 0;
+        virtual Display& fill_circle( uint8_t x, uint8_t y, uint8_t r, color_t color ) = 0;
 
         /**
          * @brief   Draw one character using currently selected font
@@ -143,8 +158,9 @@ class Display
          * @param   foreground  Character color
          * @param   background  Background color
          * @return  Width of the character
+         * @return  Display - Fluent
          */
-        virtual Display &draw_char( uint8_t x, uint8_t y, unsigned char c, color_t foreground, color_t background,
+        virtual Display& draw_char( uint8_t x, uint8_t y, unsigned char c, color_t foreground, color_t background,
                 uint8_t* outwidth = nullptr ) = 0;
 
         /**
@@ -155,84 +171,35 @@ class Display
          * @param   foreground  Character color
          * @param   background  Background color
          * @return  Width of the string (out-of-display pixels also included)
+         * @return  Display - Fluent
          */
-        virtual Display &draw_string( uint8_t x, uint8_t y, std::string str, color_t foreground, color_t background,
-                uint8_t* outwidth ) final
-        {
-            if ( font == NULL || str.empty() )
-            {
-                if ( outwidth != nullptr ) *outwidth = 0;
-                return *this;
-            }
-
-            uint8_t t { x };
-            for ( char& c : str )
-            {
-                uint8_t _x { 0 };
-                draw_char( t, y, c, foreground, background, &_x );
-                t += ( _x + font->c + 1 );
-            }
-
-            if ( outwidth != nullptr ) *outwidth = ( t - x );
-            return *this;
-        }
+        virtual Display& draw_string( uint8_t x, uint8_t y, std::string str, color_t foreground, color_t background,
+                uint8_t* outwidth = nullptr );
 
         /**
          * @brief   Measure width of string with current selected font
          * @param   str         String to measure
          * @return  Width of the string
          */
-        virtual uint8_t measure_string( std::string str ) final
-        {
-            uint8_t w = 0;
-            unsigned char c;
-
-            if ( font == NULL || str.empty() ) return 0;
-
-            for ( std::string::iterator i = str.begin(); i < str.end(); i++ )
-            {
-                c = *i;
-                // we always have space in the font set
-                if ( ( c < font->char_start ) || ( c > font->char_end ) ) c = ' ';
-                c = c - font->char_start;    // c now become index to tables
-                w += font->char_descriptors [ c ].width;
-                if ( *i ) w += font->c;
-            }
-
-            return w;
-        }
+        virtual uint8_t measure_string( std::string str );
 
         /**
          * @brief   Get the height of current selected font
          * @return  Height of the font (in pixels) or 0 if none font selected
          */
-        virtual uint8_t get_font_height() final
-        {
-            if ( font == nullptr ) return 0;
-
-            return ( font->height );
-        }
+        virtual uint8_t font_height();
 
         /**
          * @brief   Get the "C" value (space between adjacent characters)
          * @return  "C" value
          */
-        virtual uint8_t get_font_c() final
-        {
-            if ( font == NULL ) return 0;
-
-            return ( font->c );
-        }
+        virtual uint8_t font_c();
 
         /**
          * @brief   Select font for drawing
          * @param   idx     Font index, see fonts.c
          */
-        virtual Display &select_font( uint8_t idx ) final
-        {
-            if ( idx < NUM_FONTS ) font = fonts [ idx ];
-            return *this;
-        }
+        virtual Display& select_font( uint8_t idx );
 };
 
 #endif  /* SSD1306_DISPLAY_H_ */

@@ -71,7 +71,7 @@ enum panel_type_t
  */
 class SSD1306
 {
-        static const uint8_t COLUMNS = 128;    /// < SSD1306 is a 128 column driver chip
+        static const constexpr char* TAG = "SSD1306";
 
     public:
 
@@ -95,11 +95,11 @@ class SSD1306
         bool init();
 
         /**
-         * @brief   De-initialize OLED panel, turn off power and free memory
+         * @brief   Turn off display and power, free memory
          * @return  true if successful
          * @remark  Possible reasons for failure include non-configured panel type, out of memory or I2C not responding
          */
-        void term();
+        void powerdown();
 
         /**
          * @brief   Return OLED panel height
@@ -115,8 +115,9 @@ class SSD1306
 
         /**
          * @brief   Clear display buffer (fill with black)
+         * @param   limit Cleared area is limited to the last refreshed area
          */
-        void clear();
+        void clear( bool limit = false );
 
         /**
          * @brief   Refresh display (send display buffer to the panel)
@@ -178,6 +179,18 @@ class SSD1306
         bool vertical( uint8_t x, uint8_t y, color_t color, uint8_t h, uint8_t w = 1 );
 
         /**
+         * @brief   Draw an aliased line
+         *
+         * @param   x       X coordinate or starting (top) point
+         * @param   y       Y coordinate or starting (top) point
+         * @param   color   Color of the line
+         * @param   xx      X coordinate or ending (bottom) point
+         * @param   yy      Y coordinate or ending (bottom) point
+         * @return  Display - Fluent
+         */
+        void line( uint8_t x, uint8_t y, color_t color, uint8_t xx, uint8_t yy );
+
+        /**
          * @brief   Set normal or inverted display
          * @param   invert      Invert display?
          */
@@ -191,6 +204,8 @@ class SSD1306
         void update_buffer( uint8_t* data, uint16_t length );
 
     private:
+        static const constexpr uint8_t COLUMNS = 128;    /// < SSD1306 is a 128 column driver chip
+
         const uint8_t BITS [ 8 ] = { 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF };    /// < Segment bit mask
 
         bool m_init { false };
@@ -201,10 +216,44 @@ class SSD1306
         uint8_t m_width { COLUMNS };          			/// panel width (128)
         uint8_t m_height;          			/// panel height (32 or 64)
         uint16_t m_pixels;          			/// panel pixel count
-        uint8_t m_refresh_top { 0 };    /// "Dirty" window
-        uint8_t m_refresh_left { 0 };
-        uint8_t m_refresh_right { 0 };
-        uint8_t m_refresh_bottom { 0 };
+
+        struct dirtywindow
+        {
+                bool isdirty { false };
+                uint8_t toppage { 255 };    /// "Dirty" window
+                uint8_t leftcol { 255 };
+                uint8_t rightcol { 0 };
+                uint8_t bottompage { 0 };
+
+                void clear()    // Clear the dirty window
+                {
+                    toppage = 255;
+                    leftcol = 255;
+                    rightcol = 0;
+                    bottompage = 0;
+                    isdirty = false;
+                }
+
+                void touch( uint8_t page, uint8_t colstart, uint8_t colend = 0 )    // Touch part of the window
+                {
+                    toppage = std::min( toppage, page );
+                    bottompage = std::max( bottompage, page );
+                    leftcol = std::min( leftcol, colstart );
+                    rightcol = std::max( rightcol, colend );
+                    isdirty = true;
+                }
+
+                void touch()    // Touch the entire window
+                {
+                    toppage = 0;
+                    bottompage = 255;
+                    leftcol = 0;
+                    rightcol = COLUMNS - 1;
+                    isdirty = true;
+                }
+        } m_dirtywindow;
+
+        dirtywindow m_previous_dirtywindow;
 
         uint8_t initcmds32 [ 25 ] =    /// < initiate 32 line display
                 { SSD1306_DISPLAYOFF,
@@ -242,7 +291,7 @@ class SSD1306
                         SSD1306_DISPLAYALLON_RESUME,
                         SSD1306_NORMALDISPLAY };
 
-        uint8_t termcmds [ 3 ] { SSD1306_DISPLAYOFF, SSD1306_CHARGEPUMP, 0x10 };    /// < Charge pump off
+        uint8_t pwrdwncmds [ 3 ] { SSD1306_DISPLAYOFF, SSD1306_CHARGEPUMP, 0x10 };    /// < Charge pump off
 };
 
 #endif  /* SSD1306_H */
