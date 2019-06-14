@@ -67,76 +67,33 @@ void app_main()
     SSD1306 ssd1306( pif, SSD1306_128x64 );
     OLED display = OLED( ssd1306 );
 
-    display.select_font( 19 ).clear();
-//    display.draw_string( 0, 0, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 8, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 16, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 24, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 32, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 48, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 56, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
+    while ( true )
+    {
+        for ( int i = 0; i < 19; i++ )
+        {
+            display.select_font( i ).clear()    //
+            .draw_string( 0, 0, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
+            .draw_string( 10, 8, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
+            .draw_string( 20, 16, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
+            .draw_string( 30, 24, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
+            .draw_string( 40, 32, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
+            .draw_string( 50, 48, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
+            .draw_string( 60, 56, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
+            sleep( 2 );
+        }
 
-//    display.draw_string( 0, 0, "@", WHITE, BLACK ).refresh();
-//    display.draw_string( 6, 0, "@", WHITE, BLACK ).refresh();
-    display.draw_string( 0, 28, "@", WHITE, BLACK ).refresh();
-    display.draw_string( 33, 29, "@", WHITE, BLACK ).refresh();
-    display.draw_string( 77, 30, "@", WHITE, BLACK ).refresh();
-    display.draw_string( 99, 31, "@", WHITE, BLACK ).refresh();
+        rectangle( &display );
+        display.refresh( true );
+        sleep( 2 );
 
-//    display.draw_string( 0, 8, "@", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 16, "@", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 24, "@", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 32, "@", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 48, "@", WHITE, BLACK ).refresh();
-//    display.draw_string( 0, 56, "@", WHITE, BLACK ).refresh();
-    sleep( .5 );
-    // rectangle( &display );
+        lines( &display, 200 );
+        display.refresh( true );
+        sleep( 2 );
 
-//    sleep( 2 );
-//
-//    display.select_font( 0 ).clear();    //.invert( true );    //.refresh();
-//    display.draw_string( 0, 0, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
-//    lines( &display, 200 );
-//    sleep( 2 );
-//    circles( &display, 10 );
-    // display.clear().draw_string( 0, 32, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
-    // circles( &display, 10 );
-
-//    display.draw_vline( 0, 0, 32, WHITE ).refresh();
-//    display.draw_char( 0, 0, '@', WHITE, BLACK );
-//    display.draw_char( 80, 8, '@', WHITE, BLACK ).refresh();
-    // display.draw_circle( 35, 35, 10, WHITE );
-    // display.fill_circle( 80, 35, 10, WHITE ).refresh( true );
-    // display.fill_circle( 80, 80, 15, WHITE ).refresh( true );
-
-//    display.draw_char( 0, 0, '@', WHITE, BLACK ).refresh();
-//    sleep( 1 );
-//    display.draw_char( 10, 1, '@', WHITE, BLACK ).refresh();
-//    display.draw_char( 20, 2, '@', WHITE, BLACK ).refresh();
-//    display.draw_char( 30, 3, '@', WHITE, BLACK ).refresh();
-//    display.draw_char( 40, 4, '@', WHITE, BLACK ).refresh();
-//    display.draw_char( 50, 5, '@', WHITE, BLACK ).refresh();
-//    display.draw_char( 60, 6, '@', WHITE, BLACK ).refresh();
-//    display.draw_char( 70, 7, '@', WHITE, BLACK ).refresh();
-//    sleep( 1 );
-//    display.draw_char( 90, 9, '@', WHITE, BLACK ).refresh();
-
-//    uint8_t y { 1 };
-//    display.clear();
-//    for ( int x = 3; x < 120; x += 10 )
-//    {
-//        display.draw_char( x, y, '@', WHITE, BLACK ).refresh();
-//        sleep( 0.4 );
-//        y += 5;
-//    }
-
-//	i2c64.segment( 1, 0, 0x3e, WHITE );
-//	i2c64.segment( 1, 1, 0x41, WHITE );
-//	i2c64.segment( 1, 2, 0x5d, WHITE );
-//	i2c64.segment( 1, 3, 0x59, WHITE );
-//	i2c64.segment( 1, 4, 0x4e, WHITE );
-
-    //  display.refresh( true );
+        circles( &display, 10 );
+        display.refresh( true );
+        sleep( 2 );
+    }
 }
 
 /*
