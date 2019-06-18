@@ -202,6 +202,12 @@ class OLED : public Display
         virtual uint8_t font_c();
 
         /**
+         * @brief   Get the font name
+         * @return  font name
+         */
+        const virtual char * font_name();
+
+        /**
          * @brief   Select font for drawing
          * @param   idx     Font index, see fonts.c
          */

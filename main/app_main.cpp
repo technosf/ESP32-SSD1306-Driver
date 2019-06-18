@@ -16,7 +16,6 @@
  See the License for the specific language governing permissions and limitations under the License.
  */
 
-//#define __i2c
 #define __i2c
 
 #include <esp_system.h>
@@ -69,31 +68,32 @@ void app_main()
 
     while ( true )
     {
-        for ( int i = 0; i < 19; i++ )
+        for ( int i = 0; i < 27; i++ )
         {
-            display.select_font( i ).clear()    //
-            .draw_string( 0, 0, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
-            .draw_string( 10, 8, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
-            .draw_string( 20, 16, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
-            .draw_string( 30, 24, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
-            .draw_string( 40, 32, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
-            .draw_string( 50, 48, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
-            .draw_string( 60, 56, "ESP32-SSD1306-Driver", WHITE, BLACK ).refresh();
+            display.select_font( i ).clear();    //
+            display.draw_string( 0, 0, display.font_name(), WHITE, BLACK )    //
+            .draw_string( 10, 16, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
+            .draw_string( 20, 24, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
+            .draw_string( 30, 42, "ESP32-SSD1306-Driver", WHITE, BLACK )    //
+            .refresh();
             sleep( 2 );
-        }
+       }
 
+        display.clear();
         rectangle( &display );
         display.refresh( true );
         sleep( 2 );
 
+        display.clear();
         lines( &display, 200 );
         display.refresh( true );
         sleep( 2 );
 
+        display.clear();
         circles( &display, 10 );
         display.refresh( true );
         sleep( 2 );
-    }
+  }
 }
 
 /*

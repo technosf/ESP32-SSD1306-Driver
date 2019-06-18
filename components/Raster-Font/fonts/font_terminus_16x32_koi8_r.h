@@ -8688,8 +8688,7 @@ static const uint8_t _fonts_terminus_16x32_koi8_r_bitmaps [] = {
 0x00, 0x00, /* ................ */
 };
 
-const font_char_desc_t _fonts_terminus_16x32_koi8_r_descriptors [] = { 
-{ 0x00, 0x0000 }, /* Dummy */
+const font_char_desc_t _fonts_terminus_16x32_koi8_r_descriptors [] = {
 { 0x10, 0x0000 }, /* Index: 0x00, char: \x01 */
 { 0x10, 0x0040 }, /* Index: 0x01, char: \x02 */
 { 0x10, 0x0080 }, /* Index: 0x02, char: \x03 */

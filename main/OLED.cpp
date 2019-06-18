@@ -220,13 +220,10 @@ Display& OLED::draw_string( uint8_t x, uint8_t y, std::string str, color_t foreg
     Font_Manager::bitmap scan = fm->rasterize( str, y );
     uint8_t * d = scan.data;
 
-    ESP_LOGI( TAG, "\tPage:%d  Height:%d  Width:%d  Data:0x%02X\n", y / 8, scan.height, scan.width, *d );
-
     for ( int i = y / 8; i < ( y / 8 ) + scan.height; i++ )
     {
         for ( int j = x; j < x + scan.width; j++ )
         {
-            ESP_LOGI( TAG, "\tI:%d  J:%d  Data:0x%02X\n", i, j, *d );
             m_ssd1306.segment( i, j, *d++, foreground );
         }
     }
@@ -245,6 +242,15 @@ uint8_t OLED::measure_string( std::string str )    //final
     if ( fm == NULL || str.empty() ) return 0;
 
     return fm->measure_string( str );
+}
+
+/**
+ * @brief   Get the font name
+ * @return  font name
+ */
+const char * OLED::font_name()
+{
+    return fm->font_name();
 }
 
 /**

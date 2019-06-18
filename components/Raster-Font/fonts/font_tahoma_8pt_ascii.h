@@ -1348,8 +1348,8 @@ const font_char_desc_t tahoma_descriptors [] = {
                 { 7, 1067 }, /* ~ */
         };
 
-const font_info_t _font_tahoma_8pt_info = {    //
-        .name = "tahoma_8pt",    //
+const font_info_t _font_tahoma_8pt_ascii_info = {    //
+        .name = "tahoma_8pt_ascii",    //
                 .height = 11, /* Character height */
                 .c = 1, /* C */
                 .char_start = '!', /* Start character */

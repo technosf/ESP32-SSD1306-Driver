@@ -54,3 +54,5 @@ Temporary Items
 #ESP32
 build
 *.old
+/sdkconfig
+/dump.sh

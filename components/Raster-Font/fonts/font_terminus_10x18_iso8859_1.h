@@ -5119,7 +5119,6 @@ static const uint8_t _fonts_terminus_10x18_iso8859_1_bitmaps [] = {
 };
 
 const font_char_desc_t _fonts_terminus_10x18_iso8859_1_descriptors [] = {    //
-        { 0x00, 0x0000 }, /* Dummy */
         { 0x0a, 0x0000 }, /* Index: 0x00, char: \x01 */
         { 0x0a, 0x0024 }, /* Index: 0x01, char: \x02 */
         { 0x0a, 0x0048 }, /* Index: 0x02, char: \x03 */

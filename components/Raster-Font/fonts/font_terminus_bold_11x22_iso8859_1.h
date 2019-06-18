@@ -6138,8 +6138,7 @@ static const uint8_t _fonts_terminus_bold_11x22_iso8859_1_bitmaps [] = {
 0x00, 0x00, /* ................ */
 };
 
-const font_char_desc_t _fonts_terminus_bold_11x22_iso8859_1_descriptors [] = { 
-{ 0x00, 0x0000 }, /* Dummy */
+const font_char_desc_t _fonts_terminus_bold_11x22_iso8859_1_descriptors [] = {
 { 0x0b, 0x0000 }, /* Index: 0x00, char: \x01 */
 { 0x0b, 0x002c }, /* Index: 0x01, char: \x02 */
 { 0x0b, 0x0058 }, /* Index: 0x02, char: \x03 */

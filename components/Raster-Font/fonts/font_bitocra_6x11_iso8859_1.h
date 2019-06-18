@@ -2929,8 +2929,7 @@ static const uint8_t _fonts_bitocra_6x11_iso8859_1_bitmaps [] = {
 0x00, /* ........ */
 };
 
-const font_char_desc_t _fonts_bitocra_6x11_iso8859_1_descriptors [] = { 
-{ 0x00, 0x0000 }, /* Dummy */
+const font_char_desc_t _fonts_bitocra_6x11_iso8859_1_descriptors [] = {
 { 0x06, 0x0000 }, /* Index: 0x00, char: \x20 */
 { 0x06, 0x000b }, /* Index: 0x01, char: \x21 */
 { 0x06, 0x0016 }, /* Index: 0x02, char: \x22 */
@@ -3158,7 +3157,7 @@ const font_char_desc_t _fonts_bitocra_6x11_iso8859_1_descriptors [] = {
 };
 
 const font_info_t _fonts_bitocra_6x11_iso8859_1_info = {    //
-        .name = "bitocra_4x7_ascii",    //
+        .name = "bitocra_6x11_iso8859_1",    //
                 .height = 11, /* Character height */
                 .c = 0, /* C */
                 .char_start = 32, /* Start character */

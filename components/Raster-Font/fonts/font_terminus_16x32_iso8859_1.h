@@ -8688,8 +8688,7 @@ static const uint8_t _fonts_terminus_16x32_iso8859_1_bitmaps [] = {
 0x00, 0x00, /* ................ */
 };
 
-const font_char_desc_t _fonts_terminus_16x32_iso8859_1_descriptors [] = { 
-{ 0x00, 0x0000 }, /* Dummy */
+const font_char_desc_t _fonts_terminus_16x32_iso8859_1_descriptors [] = {
 { 0x10, 0x0000 }, /* Index: 0x00, char: \x01 */
 { 0x10, 0x0040 }, /* Index: 0x01, char: \x02 */
 { 0x10, 0x0080 }, /* Index: 0x02, char: \x03 */
@@ -8947,12 +8946,13 @@ const font_char_desc_t _fonts_terminus_16x32_iso8859_1_descriptors [] = {
 { 0x10, 0x3f80 }, /* Index: 0xfe, char: \xff */
 };
 
-const font_info_t _fonts_terminus_16x32_iso8859_1_info = { .name = "terminus_16x32_iso8859_1", .height = 32, /* Character height */
-.c = 0, /* C */
-.char_start = 1, /* Start character */
-.char_end = 255, /* End character */
-.char_descriptors = _fonts_terminus_16x32_iso8859_1_descriptors, /* Character descriptor array */
-.bitmap = _fonts_terminus_16x32_iso8859_1_bitmaps, /* Character bitmap array */
+const font_info_t _fonts_terminus_16x32_iso8859_1_info = { .name = "terminus_16x32_iso8859_1",    //
+        .height = 32, /* Character height */
+        .c = 0, /* C */
+        .char_start = 1, /* Start character */
+        .char_end = 255, /* End character */
+        .char_descriptors = _fonts_terminus_16x32_iso8859_1_descriptors, /* Character descriptor array */
+        .bitmap = _fonts_terminus_16x32_iso8859_1_bitmaps, /* Character bitmap array */
 };
 
 #endif /* _EXTRAS_FONTS_FONT_TERMINUS_16X32_ISO8859_1_H_ */

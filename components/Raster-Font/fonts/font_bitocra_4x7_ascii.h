@@ -881,8 +881,7 @@ static const uint8_t _fonts_bitocra_4x7_ascii_bitmaps [] = {
 0x00, /* ........ */
 };
 
-const font_char_desc_t _fonts_bitocra_4x7_ascii_descriptors [] = { 
-{ 0x00, 0x0000 }, /* Dummy */
+const font_char_desc_t _fonts_bitocra_4x7_ascii_descriptors [] = {
 { 0x04, 0x0000 }, /* Index: 0x00, char: \x20 */
 { 0x04, 0x0007 }, /* Index: 0x01, char: \x21 */
 { 0x04, 0x000e }, /* Index: 0x02, char: \x22 */

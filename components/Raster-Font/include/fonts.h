@@ -24,6 +24,13 @@
 #ifndef FONTS_H
 #define FONTS_H
 
+#define FONTS_ASCII 4
+#define FONTS_ISO8859 15
+#define FONTS_KOI8 7
+
+#undef NUM_FONTS
+#define NUM_FONTS 1+FONTS_ASCII+FONTS_ISO8859+FONTS_KOI8   //!< Number of compiled-in fonts
+
 #include <stdint.h>
 
 //! @brief Character descriptor
@@ -45,7 +52,6 @@ typedef struct _font_info
         const uint8_t *bitmap;    //!< Character bitmap
 } font_info_t;
 
-#define NUM_FONTS 20   //!< Number of built-in fonts
 
 extern const font_info_t * fonts [ NUM_FONTS ];    //!< Built-in fonts
 

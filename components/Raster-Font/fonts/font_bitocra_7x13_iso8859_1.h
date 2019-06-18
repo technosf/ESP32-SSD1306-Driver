@@ -3377,8 +3377,7 @@ static const uint8_t _fonts_bitocra_7x13_iso8859_1_bitmaps [] = {
 0xf8, /* #####... */
 };
 
-const font_char_desc_t _fonts_bitocra_7x13_iso8859_1_descriptors [] = { 
-{ 0x00, 0x0000 }, /* Dummy */
+const font_char_desc_t _fonts_bitocra_7x13_iso8859_1_descriptors [] = {
 { 0x07, 0x0000 }, /* Index: 0x00, char: \x20 */
 { 0x07, 0x000d }, /* Index: 0x01, char: \x21 */
 { 0x07, 0x001a }, /* Index: 0x02, char: \x22 */

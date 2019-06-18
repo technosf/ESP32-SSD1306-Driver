@@ -16,12 +16,14 @@
  See the License for the specific language governing permissions and limitations under the License.
  */
 
+#include <stdio.h>
+
 #include "Font_Manager.h"
 
-Font_Manager::Font_Manager( uint8_t fontindex, Raster raster ) : m_raster { raster}
+Font_Manager::Font_Manager( uint8_t fontindex, Raster raster )
 {
     m_font = fonts [ fontindex ];    // Err out if out of bounds
-   // m_raster = raster;
+    m_raster = raster;
 }
 
 uint8_t Font_Manager::fontcount()
@@ -50,6 +52,7 @@ uint8_t Font_Manager::font_height()
     return ( m_font->height );
 }
 
+
 uint8_t Font_Manager::font_c()
 {
     return ( m_font->c );
@@ -67,31 +70,36 @@ uint16_t Font_Manager::measure_string( std::string str )
         c = *i;
         // we always have space in the font set
         if ( ( c < m_font->char_start ) || ( c > m_font->char_end ) ) c = ' ';
-        c = c - m_font->char_start;    // c now become index to tables
+            c = c - m_font->char_start;
         w += m_font->char_descriptors [ c ].width;
         if ( *i ) w += m_font->c;
     }
 
+
     return w;
 }
 
-Font_Manager::bitmap Font_Manager::rasterize( std::string str, uint16_t offset )
+Font_Manager::bitmap Font_Manager::rasterize( std::string str, uint16_t bitoffset )
 {
-    bitmap scan( m_raster, measure_string( str ), m_font->height, offset );
+    bitmap scan( m_raster, measure_string( str ), m_font->height, bitoffset );
 
     for ( char& c : str )
     {
+        if ( ( c < m_font->char_start ) || ( c > m_font->char_end ) ) c = ' ';
+        c = c - m_font->char_start;
         raster( c, scan );
     };
 
     return scan;
 }
 
-Font_Manager::bitmap Font_Manager::rasterize( unsigned char c, uint16_t offset )
+Font_Manager::bitmap Font_Manager::rasterize( unsigned char c, uint16_t bitoffset )
 {
     if ( ( c < m_font->char_start ) || ( c > m_font->char_end ) ) c = ' ';
+        c = c - m_font->char_start;
 
-    bitmap scan( m_raster, m_font->char_descriptors [ c ].width, m_font->height, offset );
+    bitmap scan( m_raster, m_font->char_descriptors [ c ].width, m_font->height, bitoffset );
+
     raster( c, scan );
     return scan;
 }
@@ -102,14 +110,20 @@ void Font_Manager::raster( unsigned char c, bitmap& bm )
     const uint8_t * bitmap = m_font->bitmap + char_desc.offset;                   // Pointer to L-R bitmap
     uint8_t horizontal_read_bytes = 1 + ( ( char_desc.width - 1 ) / 8 );            // Bytes to read for horizontal
     uint8_t* data;                                      // Data byte placement
-    uint8_t linecoefficient { 1 };
-    if ( bm.raster == TBLR ) linecoefficient = 8;          // For vertical raster, each line is 1/8th shift
-    uint8_t shiftright = bm.xpoint % 8;        // Number of bits to shift right on placement
+    uint8_t shiftright { 0 };
+    uint8_t linecoefficient { 8 };                      // TBLR default
+    uint8_t rowcoefficient { 1 };                       // TBLR default
+    if ( bm.raster == LRTB )
+    {
+        shiftright = bm.xpoint % 8;         // Number of bits to shift right on placement
+        linecoefficient = 1;                // For vertical raster, each line is 1/8th shift
+        rowcoefficient = 8;
+    }
 
     for ( uint8_t line = 0; line < m_font->height; line++ )
     {
         uint16_t rowdataoffset = bm.width * ( ( line + bm.heightoffset ) / linecoefficient );
-        data = bm.data + rowdataoffset + ( bm.xpoint / 8 );    // address plus lines plus offset
+        data = bm.data + rowdataoffset + ( bm.xpoint / rowcoefficient );    // address plus lines plus offset
 
         for ( uint8_t chunk = 0; chunk < horizontal_read_bytes; chunk++ )
         /*

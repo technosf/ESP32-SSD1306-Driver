@@ -32,8 +32,6 @@ class Display
 
     public:
 
-        //  virtual ~Display();
-
         /**
          * @brief   Return display width in pixels
          * @return  Panel width, or return 0 if failed (panel not initialized)
