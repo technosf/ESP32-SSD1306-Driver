@@ -138,14 +138,10 @@ Display& OLED::fill_rectangle( uint8_t x, uint8_t y, uint8_t w, uint8_t h, color
 
 Display& OLED::draw_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color )
 {
-
-    ESP_LOGI( "draw_circle", "init\n" );
     if ( r == 0 ) return *this;
 
     for ( auto& point : circle_points( x0, y0, r ) )
     {
-        ESP_LOGI( "draw_circle", "\n%d,%d\n%d,%d\n", point.x, point.ymin(), point.x, point.ymax() );
-        //ESP_LOGI( "draw_circle", "pix x:%d y:%d y':%d\n", point.x, point.ymin, point.ymax );
         draw_pixel( point.x, point.ymin(), color );
         draw_pixel( point.x, point.ymax(), color );
     }
@@ -159,7 +155,6 @@ Display& OLED::fill_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color )
 
     for ( auto& point : circle_points( x0, y0, r ) )
     {
-        ESP_LOGI( "fill_circle", "fill x:%d y:%d h:%d\n", point.x, point.ymin(), point.height() );
         draw_vline( point.x, point.ymin(), point.height(), color );
     }
 
@@ -173,7 +168,7 @@ Display& OLED::fill_circle( uint8_t x0, uint8_t y0, uint8_t r, color_t color )
 Display& OLED::draw_char( uint8_t x, uint8_t y, unsigned char c, color_t foreground, color_t background,
         uint8_t* outwidth )
 {
-    ESP_LOGI( TAG, "::draw_char" );
+    ESP_LOGD( TAG, "::draw_char" );
 
     if ( fm == nullptr || c == 0 )
     {
@@ -209,7 +204,7 @@ Display& OLED::draw_char( uint8_t x, uint8_t y, unsigned char c, color_t foregro
 Display& OLED::draw_string( uint8_t x, uint8_t y, std::string str, color_t foreground, color_t background,
         uint8_t* outwidth )
 {
-    ESP_LOGI( TAG, "::draw_string" );
+    ESP_LOGD( TAG, "::draw_string" );
 
     if ( fm == nullptr || str.empty() )
     {
@@ -295,8 +290,6 @@ std::vector< slice > circle_points( uint8_t x0, uint8_t y0, uint8_t radius )
     std::vector< slice > slices;
     if ( radius == 0 ) return slices;
 
-    ESP_LOGI( "circle_points", "init x:%d y:%d r:%d\n", x0, y0, radius );
-
     int f = 1 - radius;
     int ddF_x = 0;
     int ddF_y = -2 * radius;
@@ -326,6 +319,5 @@ std::vector< slice > circle_points( uint8_t x0, uint8_t y0, uint8_t radius )
         }
     }
 
-    ESP_LOGI( "circle_points", "slices:%d\n", slices.size() );
     return slices;
 }

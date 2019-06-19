@@ -10,11 +10,12 @@ The included _main_ class will run through some graphic experiences for you :)
 The driver is split into three components centered on the SDD1306 driver, with wire-protocol and graphics interfacing to it. It's designed to provide funtionality to draw basic shapes and text at the desired location on the display conected to an ESP32 via I2C or SPI. The SSD1306 driver component itself can be augmented with new wire-level protocols, and more advanced graphics interfaces.
 
 
+
 ### SSD1306 Driver
 
 The _SSD1306 driver_ takes base pixel and area-orientated graphics commands from upstream, applies clipping, and convert these commands efficiently into the paged-memory orientated SSD1306 instructions and data, and spits them out through a provided wire-level Protocol Interface (PIF). 
 
-The SSD1306 chip manages its display memory as sets of byte _segments_ that represent 8-verticle pixels in horizonal rows called _pages_. Updates to the dislay are sent as sets of segments with page and column coordinates. This driver implements orthogonal area commands that are processed with a bias towards the vertical axis, so that  the segment udaes are minimalized. The area commands themselves are pure point or horizonatal/vertical line or box draws. There is also a _segment_ command to update one or more segments that can be used by higher level optimized graphics drivers.
+The SSD1306 chip manages its display memory as sets of byte _segments_ that represent 8-verticle pixels in horizonal rows called _pages_. Updates to the dislay are sent as sets of segments with page and column coordinates. This driver implements orthogonal area commands that are processed with a bias towards the vertical axis, so that  the segment udates are minimalized. The area commands themselves are pure point or horizonatal/vertical line or box draws. There is also a _segment_ command to update one or more segments that can be used by higher level optimized graphics drivers.
 
 
 ### Wire-level Protocol Interface
@@ -27,6 +28,28 @@ Currently there is an ESP-IDF v3 implementations of I2C (SPI underway).
 ### Graphics
 
 The graphics component adds a higher level commands to draw and fill boxes and circles, and also to output font characters. This interface is also aware of the SSD1306 paged-memory architecture and will look at distilling everything into SSD1306 segments. Font characters are drawn from horizontal scanned font representations and tranformed on-the-fly into vertical representations to avoid building characters one-pixel-at-a-time in the display memory.  
+
+### Example
+```
+PIF* pif = new I2C_PIF { scl, sda, 0x3c };  // GPIOs and I2C addr
+
+pif->info();	 // I2C bus info - FYI
+
+
+SSD1306 ssd1306( pif, SSD1306_128x64 );	// Create Panel driver
+OLED display = OLED( ssd1306 );				// Create display
+
+display.select_font( 0 ).clear();    
+display
+	.draw_string( 0, 0, display.font_name(), WHITE, BLACK )  
+	.refresh();		
+
+display.draw_circle( 30, 30, 10, WHITE )
+	.draw_line( 85, 16, 103, 58, WHITE )
+	.fill_rectangle( 25, 25, 40, 30, INVERT )
+	.refresh();
+
+```
 
 
 ## Future Features

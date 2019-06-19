@@ -38,7 +38,7 @@ SSD1306::SSD1306( PIF* pif, panel_type_t type )
 
 bool SSD1306::init()
 {
-    ESP_LOGI( TAG, "::init" );
+    ESP_LOGD( TAG, "::init" );
     if ( m_init ) return false;
     m_init = true;
     powerdown();
@@ -46,22 +46,22 @@ bool SSD1306::init()
     // Now we assume all sending will be successful
     if ( m_type == SSD1306_128x64 )
     {
-        ESP_LOGI( TAG, "\tcmd: init 64" );
+        ESP_LOGD( TAG, "\tcmd: init 64" );
         m_pif->command( initcmds64, sizeof ( initcmds64 ) );
     }
     else if ( m_type == SSD1306_128x32 )
     {
-        ESP_LOGI( TAG, "\tcmd: init 32" );
+        ESP_LOGD( TAG, "\tcmd: init 32" );
         m_pif->command( initcmds32, sizeof ( initcmds32 ) );
     }
 
     clear();
     refresh( true );
 
-    ESP_LOGI( TAG, "\tcmd: ON" );
+    ESP_LOGD( TAG, "\tcmd: ON" );
     m_pif->command( SSD1306_DISPLAYON );
 
-    ESP_LOGI( TAG, "::init - complete" );
+    ESP_LOGD( TAG, "::init - complete" );
     return true;
 }
 
@@ -85,7 +85,7 @@ uint8_t SSD1306::height()
 
 void SSD1306::clear( bool limit )
 {
-    ESP_LOGI( TAG, "::clear  limit:%d", limit );
+    ESP_LOGD( TAG, "::clear  limit:%d", limit );
 
     if ( !limit )
     {
@@ -106,7 +106,7 @@ void SSD1306::clear( bool limit )
 
 void SSD1306::refresh( bool force )
 {
-    ESP_LOGI( TAG, "::refresh Force:%d", force );
+    ESP_LOGD( TAG, "::refresh Force:%d", force );
 
     if ( !m_dirtywindow.isdirty ) return;
 
@@ -148,7 +148,7 @@ void SSD1306::refresh( bool force )
 
 bool SSD1306::segment( uint8_t page, uint8_t column, uint8_t bits, color_t color, uint8_t count )
 {
-    //   ESP_LOGI( TAG, "::segment page:%d column:%d count:%d", page, column, count );
+    ESP_LOGD( TAG, "::segment page:%d column:%d count:%d", page, column, count );
 
     if ( count == 0 || ( page >= m_type ) || ( column >= m_width ) ) return false;
 
@@ -180,13 +180,13 @@ bool SSD1306::segment( uint8_t page, uint8_t column, uint8_t bits, color_t color
 
 bool SSD1306::pixel( uint8_t x, uint8_t y, color_t color )
 {
-    //  ESP_LOGI( TAG, "::pixel  x:%d  y:%d", x, y );
+    ESP_LOGD( TAG, "::pixel  x:%d  y:%d", x, y );
     return segment( y / 8, x, ( 1 << ( y & 7 ) ), color );
 }
 
 bool SSD1306::box( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h )
 {
-    ESP_LOGI( TAG, "::box x:%d y:%d w:%d h:%d", x, y, w, h );
+    ESP_LOGD( TAG, "::box x:%d y:%d w:%d h:%d", x, y, w, h );
 
     if ( w == 0 || h == 0 ) return false;
 
@@ -227,19 +227,19 @@ bool SSD1306::box( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h )
 
 bool SSD1306::horizontal( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h )
 {
-    ESP_LOGI( TAG, "::horizontal >" );
+    ESP_LOGD( TAG, "::horizontal >" );
     return box( x, y, color, w, h );
 }
 
 bool SSD1306::vertical( uint8_t x, uint8_t y, color_t color, uint8_t h, uint8_t w )
 {
-    ESP_LOGI( TAG, "::vertical >" );
+    ESP_LOGD( TAG, "::vertical >" );
     return box( x, y, color, w, h );
 }
 
 void SSD1306::line( uint8_t x, uint8_t y, color_t color, uint8_t xx, uint8_t yy )
 {
-    ESP_LOGI( TAG, "::line  %d,%d - %d,%d", x, y, xx, yy );
+    ESP_LOGD( TAG, "::line  %d,%d - %d,%d", x, y, xx, yy );
 
     if ( xx < x )    // Ensure we're going left>right
     {
@@ -281,7 +281,7 @@ void SSD1306::line( uint8_t x, uint8_t y, color_t color, uint8_t xx, uint8_t yy 
 
 void SSD1306::invert_display( bool invert )
 {
-    ESP_LOGI( TAG, "::invert_display invert:%d", invert );
+    ESP_LOGD( TAG, "::invert_display invert:%d", invert );
 
     if ( invert )
         m_pif->command( SSD1306_INVERTDISPLAY );
@@ -291,6 +291,6 @@ void SSD1306::invert_display( bool invert )
 
 void SSD1306::update_buffer( uint8_t* data, uint16_t length )
 {
-    ESP_LOGI( TAG, "::update_buffer" );
+    ESP_LOGD( TAG, "::update_buffer" );
     memcpy( m_buffer, data, min( length, m_buffer_size ) );
 }
