@@ -71,9 +71,9 @@ Thinking about what could be added:
 
 ## History and References
 
-This repo is a fork of [imxieyi/esp32-i2c-ssd1306-oled](https://github.com/imxieyi/esp32-i2c-ssd1306-oled), an I2C-only driver for the eponomous SSD1306 OLED driver chip. Interested in an SPI wire protocol version also, I dug into the code and decided to refactor it, add a pluggable wire protocol component, and before I knew it changed the memory management and the base graphics too, and especially the font processing. 
+This repo was originally a fork of [imxieyi/esp32-i2c-ssd1306-oled](https://github.com/imxieyi/esp32-i2c-ssd1306-oled), an I2C-only driver for the eponomous SSD1306 OLED driver chip. Interested in an SPI wire protocol version also, I dug into the code and decided to refactor it, add a pluggable wire protocol component, and before I knew it changed the memory management and the base graphics too, and especially the font processing. 
 
-The code has been reorganized too with the font management component, which appear to originate from [Baoshi's repo](https://github.com/baoshi/ESP-I2C-OLED), being moved out to its own components to ease integrating new font representation classes.
+The code has been reorganized too with the font management component, which appear to originate from [Baoshi's repo](https://github.com/baoshi/ESP-I2C-OLED), being moved out to its own component, [Raster-Font](https://github.com/technosf/Raster-Font), to ease integration of new _font representation_ classes.
 
 
 ## License
