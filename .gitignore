@@ -56,3 +56,6 @@ build
 *.old
 /sdkconfig
 /dump.sh
+apidoc/warnings.txt
+apidoc/html/
+.vscode

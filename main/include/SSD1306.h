@@ -16,283 +16,183 @@
  See the License for the specific language governing permissions and limitations under the License.
  */
 
-#ifndef SSD1306_H_
-#define SSD1306_H_
+#ifndef SSD1306_SSD1306_H_
+#define SSD1306_SSD1306_H_
 
-#define SSD1306_CHARGEPUMP				0x8d
-#define SSD1306_COLUMNADDR 				0x21
-#define SSD1306_COMSCANDEC				0xc8
-#define SSD1306_DEACTIVATE_SCROLL		0x2e
-#define SSD1306_DISPLAYALLON_RESUME		0xa4
-#define SSD1306_DISPLAYOFF				0xae
-#define SSD1306_DISPLAYON 				0xaf
-#define SSD1306_INVERTDISPLAY 			0xa7
-#define SSD1306_MEMORYMODE				0x20
-#define SSD1306_NORMALDISPLAY 			0xa6
-#define SSD1306_PAGEADDR 				0x22
-#define SSD1306_SETCOMPINS				0xda
-#define SSD1306_SETCONTRAST				0x81
-#define SSD1306_SETDISPLAYCLOCKDIV		0xd5
-#define SSD1306_SETDISPLAYOFFSET		0xd3
-#define SSD1306_SETDISPLAYSTARTLINE		0x40
-#define SSD1306_SETMULTIPLEX			0xa8
-#define SSD1306_SETPRECHARGE			0xd9
-#define SSD1306_SETSEGREMAP_0			0xa0
-#define SSD1306_SETSEGREMAP_127			0xa1
-#define SSD1306_SETVCOMDETECT			0xdb
+#define CMD_CHARGEPUMP 0x8d
+#define CMD_COLUMNADDR 0x21
+#define CMD_COMSCANDEC 0xc8
+#define CMD_DEACTIVATE_SCROLL 0x2e
+#define CMD_DISPLAYALLON_RESUME 0xa4
+#define CMD_DISPLAYOFF 0xae
+#define CMD_DISPLAYON 0xaf
+#define CMD_INVERTDISPLAY 0xa7
+#define CMD_MEMORYMODE 0x20
+#define CMD_NORMALDISPLAY 0xa6
+#define CMD_PAGEADDR 0x22
+#define CMD_SETCOMPINS 0xda
+#define CMD_SETCONTRAST 0x81
+#define CMD_SETDISPLAYCLOCKDIV 0xd5
+#define CMD_SETDISPLAYOFFSET 0xd3
+#define CMD_SETDISPLAYSTARTLINE 0x40
+#define CMD_SETMULTIPLEX 0xa8
+#define CMD_SETPRECHARGE 0xd9
+#define CMD_SETSEGREMAP_0 0xa0
+#define CMD_SETSEGREMAP_127 0xa1
+#define CMD_SETVCOMDETECT 0xdb
 
+#include <esp_log.h>
+#include <stdio.h>
+
+#include <algorithm>
 #include <string.h>
 #include <stdint.h>
 #include <algorithm>
 
 #include "PIF.h"
 
+/**
+ * @brief Color options supported by the SSD1306
+ * 
+ */
 enum color_t
 {
-    TRANSPARENT = -1,    //!< Transparent (not drawing)
-    BLACK = 0,    //!< Black (pixel off)
-    WHITE = 1,    //!< White (or blue, yellow, pixel on)
-    INVERT = 2,    //!< Invert pixel (XOR)
+    TRANSPARENT = -1, ///< Transparent (not drawing)
+    BLACK = 0,        ///< Black (pixel off)
+    WHITE = 1,        ///< White (or blue, yellow, pixel on)
+    INVERT = 2,       ///< Invert pixel (XOR)
 };
 
 /**
  * @brief Panel type
+ * 
  * Panel type and dimensions, with the enumerator indicating the number of memory pages
  */
 enum panel_type_t
 {
-    SSD1306_128x64 = 8,    //!< 128x32 panel, 8 pages of memory
-    SSD1306_128x32 = 4    //!< 128x64 panel, 4 pages of memory
+    SSD1306_128x64 = 8, ///< 128x32 panel, 8 pages of memory
+    SSD1306_128x32 = 4  ///< 128x64 panel, 4 pages of memory
 };
 
 /**
- * \class SSD1306
- *
+ * @brief SSD1306 chip driver, commands and controls
+ * 
  */
 class SSD1306
 {
-        static const constexpr char* TAG = "SSD1306";
+    static const constexpr char *TAG = "SSD1306";
 
-    public:
+public:
+    SSD1306(PIF *pif, panel_type_t type);
 
-        /**
-         * @brief   Constructor
-         * @param   pif     Wire protocol interface adaptor
-         * @param   scl_pin  SCL Pin
-         * @param   sda_pin  SDA Pin
-         */
-        SSD1306( PIF* pif, panel_type_t type );
+    virtual ~SSD1306()
+    {
+    }
 
-        virtual ~SSD1306()
+    bool init();
+    void powerdown();
+    uint8_t width();
+    uint8_t height();
+    void clear(bool limit = false);
+    void refresh(bool force);
+    bool segment(uint8_t page, uint8_t column, uint8_t bits, color_t color, uint8_t count = 1);
+    bool pixel(uint8_t x, uint8_t y, color_t color);
+    bool box(uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h);
+    bool horizontal(uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h = 1);
+    bool vertical(uint8_t x, uint8_t y, color_t color, uint8_t h, uint8_t w = 1);
+    void line(uint8_t x, uint8_t y, color_t color, uint8_t xx, uint8_t yy);
+    void invert_display(bool invert);
+    void update_buffer(uint8_t *data, uint16_t length);
+
+private:
+    static const constexpr uint8_t COLUMNS = 128; ///< SSD1306 is a 128 column driver chip
+
+    const uint8_t BITS[8] = {0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF}; ///< Segment bit mask
+
+    bool m_init{false};
+    PIF *m_pif;                   ///< Wire protocol adapter
+    panel_type_t m_type;          ///< panel type
+    uint8_t (*m_buffer)[COLUMNS]; ///< Display buffer - Page by Column
+    uint16_t m_buffer_bytes;       ///< buffer size in bytes
+    uint8_t m_width{COLUMNS};     ///< panel width (128)
+    uint8_t m_height;             ///< panel height (32 or 64)
+    uint16_t m_pixels;            ///< panel pixel count
+
+    struct dirtywindow ///< "Dirty" window
+    {
+        bool isdirty{false};
+        uint8_t toppage{255};
+        uint8_t leftcol{255};
+        uint8_t rightcol{0};
+        uint8_t bottompage{0};
+
+        void clear() ///< Clear the dirty window
         {
+            toppage = 255;
+            leftcol = 255;
+            rightcol = 0;
+            bottompage = 0;
+            isdirty = false;
         }
 
-        /**
-         * @brief   Initialize OLED panel
-         * @return  true if successful
-         * @remark  Possible reasons for failure include non-configured panel type, out of memory or I2C not responding
-         */
-        bool init();
-
-        /**
-         * @brief   Turn off display and power, free memory
-         * @return  true if successful
-         * @remark  Possible reasons for failure include non-configured panel type, out of memory or I2C not responding
-         */
-        void powerdown();
-
-        /**
-         * @brief   Return OLED panel height
-         * @return  Panel height, or return 0 if failed (panel not initialized)
-         */
-        uint8_t width();
-
-        /**
-         * @brief   Return OLED panel height
-         * @return  Panel height, or return 0 if failed (panel not initialized)
-         */
-        uint8_t height();
-
-        /**
-         * @brief   Clear display buffer (fill with black)
-         * @param   limit Cleared area is limited to the last refreshed area
-         */
-        void clear( bool limit = false );
-
-        /**
-         * @brief   Refresh display (send display buffer to the panel)
-         */
-        void refresh( bool force );
-
-        /**
-         * @brief	Set the color of pixels in a segment
-         * @param   page   the page coord of the column
-         * @param   column   the column # in the page
-         * @param   bits   the segment bits to set
-         * @param   color   the color to set the segment bits
-         * @param   count   the number of consecutive segments in the page to draw
-         * @return  True if segment was drawn
-         */
-        bool segment( uint8_t page, uint8_t column, uint8_t bits, color_t color, uint8_t count = 1 );
-
-        /**
-         * @brief	Set the color of a single pixel
-         * @param   x   the x coord of the pixel
-         * @param   y   the y coord of the pixel
-         * @param   color   the desired color of the pixel
-         * @param	count	number of times to draw the bits
-         * @return  True if pixel was drawn
-         */
-        bool pixel( uint8_t x, uint8_t y, color_t color );
-
-        /**
-         * @brief	Draw a filled box of the given color
-         * @param   x   the starting x coord of the box
-         * @param   y   the starting y coord of the box
-         * @param   color   the color to set the box
-         * @param   w   the width of the box in pixels to draw
-         * @param   h   the height of the box in pixels
-         * @return  True if line was drawn
-         */
-        bool box( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h );
-
-        /**
-         * @brief	Draw a horizontal line of the given color
-         * @param   x   the starting x coord of the line
-         * @param   y   the starting y coord of the line
-         * @param   color   the color to set the segment bits
-         * @param   w   the width of the line in pixels to draw
-         * @param   h   the height of the line in pixels, defaults to 1
-         * @return  True if line was drawn
-         */
-        bool horizontal( uint8_t x, uint8_t y, color_t color, uint8_t w, uint8_t h = 1 );
-
-        /**
-         * @brief	Draw a vertical line of the given color
-         * @param   x   the starting x coord of the line
-         * @param   y   the starting y coord of the line
-         * @param   color   the color to set the segment bits
-         * @param   h   the height of the line in pixels to draw
-         * @param   w   the width of the line in pixels, defaults to 1
-         * @return  True if line was drawn
-         */
-        bool vertical( uint8_t x, uint8_t y, color_t color, uint8_t h, uint8_t w = 1 );
-
-        /**
-         * @brief   Draw an aliased line
-         *
-         * @param   x       X coordinate or starting (top) point
-         * @param   y       Y coordinate or starting (top) point
-         * @param   color   Color of the line
-         * @param   xx      X coordinate or ending (bottom) point
-         * @param   yy      Y coordinate or ending (bottom) point
-         * @return  Display - Fluent
-         */
-        void line( uint8_t x, uint8_t y, color_t color, uint8_t xx, uint8_t yy );
-
-        /**
-         * @brief   Set normal or inverted display
-         * @param   invert      Invert display?
-         */
-        void invert_display( bool invert );
-
-        /**
-         * @brief   Direct update display buffer
-         * @param   data        Data to fill display buffer, no length check is performed!
-         * @param   length      Length of data
-         */
-        void update_buffer( uint8_t* data, uint16_t length );
-
-    private:
-        static const constexpr uint8_t COLUMNS = 128;    /// < SSD1306 is a 128 column driver chip
-
-        const uint8_t BITS [ 8 ] = { 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF };    /// < Segment bit mask
-
-        bool m_init { false };
-        PIF * m_pif;	///< Wire protocol adapter
-        panel_type_t m_type;
-        uint8_t (*m_buffer) [ COLUMNS ];    /// Display buffer - Page by Column
-        uint16_t m_buffer_size;
-        uint8_t m_width { COLUMNS };          			/// panel width (128)
-        uint8_t m_height;          			/// panel height (32 or 64)
-        uint16_t m_pixels;          			/// panel pixel count
-
-        struct dirtywindow
+        void touch(uint8_t page, uint8_t colstart, uint8_t colend = 0) ///< Touch part of the window
         {
-                bool isdirty { false };
-                uint8_t toppage { 255 };    /// "Dirty" window
-                uint8_t leftcol { 255 };
-                uint8_t rightcol { 0 };
-                uint8_t bottompage { 0 };
+            toppage = std::min(toppage, page);
+            bottompage = std::max(bottompage, page);
+            leftcol = std::min(leftcol, colstart);
+            rightcol = std::max(rightcol, colend);
+            isdirty = true;
+        }
 
-                void clear()    // Clear the dirty window
-                {
-                    toppage = 255;
-                    leftcol = 255;
-                    rightcol = 0;
-                    bottompage = 0;
-                    isdirty = false;
-                }
+        void touch() ///< Touch the entire window
+        {
+            toppage = 0;
+            bottompage = 255;
+            leftcol = 0;
+            rightcol = COLUMNS - 1;
+            isdirty = true;
+        }
+    } m_dirtywindow;
 
-                void touch( uint8_t page, uint8_t colstart, uint8_t colend = 0 )    // Touch part of the window
-                {
-                    toppage = std::min( toppage, page );
-                    bottompage = std::max( bottompage, page );
-                    leftcol = std::min( leftcol, colstart );
-                    rightcol = std::max( rightcol, colend );
-                    isdirty = true;
-                }
+    dirtywindow m_previous_dirtywindow;
 
-                void touch()    // Touch the entire window
-                {
-                    toppage = 0;
-                    bottompage = 255;
-                    leftcol = 0;
-                    rightcol = COLUMNS - 1;
-                    isdirty = true;
-                }
-        } m_dirtywindow;
+    uint8_t initcmds32[25] = ///< initiate 32 line display
+        {CMD_DISPLAYOFF,
+         CMD_SETDISPLAYCLOCKDIV, 0x80, ///< Suggested value 0x80
+         CMD_SETMULTIPLEX, 0x1f,       ///< 1/32
+         CMD_SETDISPLAYOFFSET, 0x00,   ///< 0 no offset
+         CMD_SETDISPLAYSTARTLINE + 0,  ///< line #0
+         CMD_MEMORYMODE, 0x00,         ///< 0x0 act like ks0108
+         CMD_SETSEGREMAP_127,
+         CMD_COMSCANDEC,
+         CMD_SETCOMPINS, 0x02,
+         CMD_SETCONTRAST, 0x2f,
+         CMD_SETPRECHARGE, 0xf1,
+         CMD_SETVCOMDETECT, 0x40,
+         CMD_DEACTIVATE_SCROLL,
+         CMD_CHARGEPUMP, 0x14, ///< Charge pump on
+         CMD_DISPLAYALLON_RESUME,
+         CMD_NORMALDISPLAY};
 
-        dirtywindow m_previous_dirtywindow;
+    uint8_t initcmds64[25] = ///< Initiate 64 line display
+        {CMD_DISPLAYOFF,
+         CMD_SETDISPLAYCLOCKDIV, 0x80, ///< Suggested value 0x80
+         CMD_SETMULTIPLEX, 0x3f,       ///< 1/64
+         CMD_SETDISPLAYOFFSET, 0x00,   ///< 0 no offset
+         CMD_SETDISPLAYSTARTLINE + 0,  ///< line #0
+         CMD_MEMORYMODE, 0x00,         ///< 0x0 act like ks0108
+         CMD_SETSEGREMAP_127,
+         CMD_COMSCANDEC,
+         CMD_SETCOMPINS, 0x12,
+         CMD_SETCONTRAST, 0xcf,
+         CMD_SETPRECHARGE, 0xf1,
+         CMD_SETVCOMDETECT, 0x30,
+         CMD_DEACTIVATE_SCROLL,
+         CMD_CHARGEPUMP, 0x14, ///< Charge pump on
+         CMD_DISPLAYALLON_RESUME,
+         CMD_NORMALDISPLAY};
 
-        uint8_t initcmds32 [ 25 ] =    /// < initiate 32 line display
-                { SSD1306_DISPLAYOFF,
-                SSD1306_SETDISPLAYCLOCKDIV, 0x80,    // Suggested value 0x80
-                        SSD1306_SETMULTIPLEX, 0x1f,			// 1/32
-                        SSD1306_SETDISPLAYOFFSET, 0x00,			// 0 no offset
-                        SSD1306_SETDISPLAYSTARTLINE + 0,    // line #0
-                        SSD1306_MEMORYMODE, 0x00,    // 0x0 act like ks0108
-                        SSD1306_SETSEGREMAP_127,
-                        SSD1306_COMSCANDEC,
-                        SSD1306_SETCOMPINS, 0x02,    //
-                        SSD1306_SETCONTRAST, 0x2f,    //
-                        SSD1306_SETPRECHARGE, 0xf1,    //
-                        SSD1306_SETVCOMDETECT, 0x40,    //
-                        SSD1306_DEACTIVATE_SCROLL,
-                        SSD1306_CHARGEPUMP, 0x14,    // Charge pump on
-                        SSD1306_DISPLAYALLON_RESUME,
-                        SSD1306_NORMALDISPLAY };
-
-        uint8_t initcmds64 [ 25 ] =    /// < Initiate 64 line display
-                { SSD1306_DISPLAYOFF,
-                SSD1306_SETDISPLAYCLOCKDIV, 0x80,    // Suggested value 0x80
-                        SSD1306_SETMULTIPLEX, 0x3f,    // 1/64
-                        SSD1306_SETDISPLAYOFFSET, 0x00,    // 0 no offset
-                        SSD1306_SETDISPLAYSTARTLINE + 0,    // line #0
-                        SSD1306_MEMORYMODE, 0x00,    // 0x0 act like ks0108
-                        SSD1306_SETSEGREMAP_127,
-                        SSD1306_COMSCANDEC,
-                        SSD1306_SETCOMPINS, 0x12,    //
-                        SSD1306_SETCONTRAST, 0xcf,    //
-                        SSD1306_SETPRECHARGE, 0xf1,    //
-                        SSD1306_SETVCOMDETECT, 0x30,    //
-                        SSD1306_DEACTIVATE_SCROLL,
-                        SSD1306_CHARGEPUMP, 0x14,    // Charge pump on
-                        SSD1306_DISPLAYALLON_RESUME,
-                        SSD1306_NORMALDISPLAY };
-
-        uint8_t pwrdwncmds [ 3 ] { SSD1306_DISPLAYOFF, SSD1306_CHARGEPUMP, 0x10 };    /// < Charge pump off
+    uint8_t pwrdwncmds[3]{CMD_DISPLAYOFF, CMD_CHARGEPUMP, 0x10}; ///< Charge pump off
 };
 
-#endif  /* SSD1306_H */
-
+#endif /* SSD1306_SSD1306_H */

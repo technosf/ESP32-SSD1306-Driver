@@ -26,7 +26,8 @@
 #include "PIF.h"
 
 /**
- * \class I2C_PIF
+ * @brief I2C implementation of PIF 
+ * 
  */
 class I2C_PIF : public PIF
 {
@@ -46,7 +47,7 @@ class I2C_PIF : public PIF
          * @param ctrl
          * @param data
          */
-        void write( uint8_t ctrl, uint8_t data )
+        void write(const uint8_t ctrl, const uint8_t data )
         {
             i2c_cmd_handle_t cmdlink = i2c_cmd_link_create();
             i2c_master_start( cmdlink );
@@ -64,13 +65,14 @@ class I2C_PIF : public PIF
          * @param data
          * @param size
          */
-        void write( uint8_t ctrl, uint8_t* data, uint8_t size )
+        void write(const uint8_t ctrl, const uint8_t* data, uint8_t size )
         {
+            uint8_t* d =  (uint8_t*)data;
             i2c_cmd_handle_t cmdlink = i2c_cmd_link_create();
             i2c_master_start( cmdlink );
             i2c_master_write_byte( cmdlink, m_address_write, 1 );
             i2c_master_write_byte( cmdlink, ctrl, 1 );
-            i2c_master_write( cmdlink, data, size, 1 );
+            i2c_master_write( cmdlink, d, size, 1 );
             i2c_master_stop( cmdlink );
             i2c_master_cmd_begin( i2c_master_port, cmdlink, 50 / portTICK_RATE_MS );
             i2c_cmd_link_delete( cmdlink );
@@ -111,12 +113,12 @@ class I2C_PIF : public PIF
          *
          * @param cmd
          */
-        void command( uint8_t cmd )
+        void command(const uint8_t cmd )
         {
             write( 0x00, cmd );
         }
 
-        void command( uint8_t* cmd, uint8_t size )
+        void command(const uint8_t* cmd, uint8_t size )
         {
             if ( size > 0 )
             {

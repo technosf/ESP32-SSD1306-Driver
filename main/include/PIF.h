@@ -22,10 +22,9 @@
 #include <stdint.h>
 
 /**
- * \class PIF
  * @brief Protocol Interface
  *
- * Abstract SSD1306-to-wire-protocol interface specification
+ * Abstract SSD1306-to-wire-protocol interface specification to be implemented by specific protocol drivers
  *
  */
 class PIF
@@ -46,19 +45,22 @@ class PIF
 
         /**
          * @brief Sends a SSD1306 command over the wire protocol to the SSD1306 from the ESP32
+         * 
          * @param cmd the command
          */
-        virtual void command( uint8_t cmd ) = 0;
+        virtual void command(const uint8_t cmd ) = 0;
 
         /**
          * @brief Sends SSD1306 commands over the wire protocol to the SSD1306 from the ESP32
+         * 
          * @param cmd the command
          * @param size size of command in bytes
          */
-        virtual void command( uint8_t* cmd, uint8_t size ) = 0;
+        virtual void command(const uint8_t* cmd, uint8_t size ) = 0;
 
         /**
          * @brief Sends SSD1306 data over the wire protocol to the SSD1306 from the ESP32
+         * 
          * @param data the data
          * @param size size of data in bytes
          */
